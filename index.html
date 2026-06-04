@@ -398,27 +398,56 @@
         }
 
         function fetchDataEngine(sheetName) {
-            showLoader(true);
-            
-            if (typeof google !== 'undefined' && google.script && google.script.run) {
-                google.script.run
-                    .withSuccessHandler(function(response) {
-                        buildResponsiveTable(sheetName, response);
-                        showLoader(false);
-                    })
-                    .withFailureHandler(function(err) {
-                        console.error("Backend integration runtime failure:", err);
-                        showLoader(false);
-                    })
-                    .getSheetData(sheetName);
-            } else {
-                setTimeout(() => {
-                    const mockPayload = fetchLocalMockDataset(sheetName);
-                    buildResponsiveTable(sheetName, mockPayload);
-                    showLoader(false);
-                }, 400);
-            }
-        }
+    showLoader(true);
+    
+    // ⚠️ นำลิงก์ Web App URL (ที่ลงท้ายด้วย /exec) ที่ได้จาก Google Apps Script มาวางแทนที่เครื่องหมายคำพูดด้านล่างนี้ครับ
+    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx9qQh3LnFQ7AuVMJuVWPpoNT5xgL5hWvHxLQi6JUdC6cqSz1r3Vzjb0XiIbAW6qxBe/exec";
+    
+    // ระบบตรวจจับอัจฉริยะ: หากรันอยู่บนระบบ Google Web App ตรงๆ จะใช้ google.script.run ตามเดิม
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+            .withSuccessHandler(function(response) {
+                buildResponsiveTable(sheetName, response);
+                showLoader(false);
+            })
+            .withFailureHandler(function(err) {
+                console.error("Backend integration runtime failure:", err);
+                showLoader(false);
+            })
+            .getSheetData(sheetName);
+    } 
+    // 🚀 หากรันบน GitHub Pages ระบบจะเปลี่ยนมาใช้ Fetch API ยิงข้อมูลสดๆ ข้ามระบบจาก Google Sheets ทันที
+    else {
+        fetch(`${APPS_SCRIPT_WEBAPP_URL}?sheet=${encodeURIComponent(sheetName)}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(response => {
+                // ตรวจสอบโครงสร้างข้อมูล หาก Backend ส่ง Error กลับมา ให้สลับไปใช้ Mock Data
+                if (response && response.error) {
+                    console.error("Backend Apps Script Error:", response.error);
+                    fallbackToMockData(sheetName);
+                    return;
+                }
+                buildResponsiveTable(sheetName, response);
+                showLoader(false);
+            })
+            .catch(err => {
+                console.error("GitHub Cross-Origin Fetch Error (สลับไปใช้ Mock Data อัตโนมัติ):", err);
+                fallbackToMockData(sheetName);
+            });
+    }
+}
+
+// ฟังก์ชันเสริมสำหรับดึงข้อมูลสำรอง ในกรณีที่เซิร์ฟเวอร์หลักหรืออินเทอร์เน็ตหน้างานมีปัญหา บอร์ดคะแนนจะไม่ค้างจอดำ
+function fallbackToMockData(sheetName) {
+    const mockPayload = fetchLocalMockDataset(sheetName);
+    buildResponsiveTable(sheetName, mockPayload);
+    showLoader(false);
+}
 
         function sliceColumns(row, startCol, count) {
             if (!row) return [];
