@@ -172,31 +172,27 @@
             gap: 40px;
         }
 
-        /* 1. ขยายกรอบขาวที่หุ้มตาราง */
-.table-responsive-custom {
-    background: #ffffff;
-    border-radius: 18px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-    margin-bottom: 20px;
-    max-height: 850px; /* 👈 ปรับจาก 750 เป็น 850 หรือมากกว่าตามต้องการ */
-}
+        .table-responsive-custom {
+            background: #ffffff;
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
 
-/* 2. ขยายพื้นที่สำหรับตัวตารางและการเลื่อนอัตโนมัติ */
-.autoscore-container {
-    max-height: 850px; /* 👈 ปรับให้เท่ากับข้างบน */
-    overflow-y: hidden; 
-    position: relative;
-}
+        /* กรอบมอนิเตอร์ตารางคะแนนปิดสกรอลบาร์ */
+        .autoscore-container {
+            max-height: 750px; /* ปรับลดลงเล็กน้อยเพื่อให้สอดรับกับความสูงแบนเนอร์ที่เพิ่มขึ้นเป็น 250px ได้พอดีหน้าจอ */
+            overflow-y: hidden; 
+            position: relative;
+        }
 
-/* 3. ปรับความสูงสูงสุดของตัวตาราง */
-.table-custom {
-    margin-bottom: 0;
-    width: 100%;
-    max-height: 850px; /* 👈 ปรับให้เท่ากัน */
-    border-collapse: separate;
-}
+        .table-custom {
+            margin-bottom: 0;
+            width: 100%;
+            border-collapse: separate;
+        }
 
         .table-custom tr.field-label-row th {
             background-color: var(--thead-bg-gray) !important;
